@@ -25,11 +25,13 @@ function SignUp() {
       return alert('이름,이메일,비빌번호를 다시 입력해주세요');
     }
     try {
+      // 새롭게 이메일 인증 권한을 생성한다
       const result = await createUserWithEmailAndPassword(
         auth,
         email,
         password
       );
+      //users테이블에 값을 저장
       await setDoc(doc(db, 'users', result.user.uid), {
         uid: result.user.uid,
         name,

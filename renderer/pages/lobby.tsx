@@ -29,12 +29,12 @@ function Lobby() {
   const router = useRouter();
   const { setEmail, setPassword } = useContext(Context);
 
-  const [user, setUser] = useState<any>({});
+  const [user, setUser] = useState<any>({}); //로그인한 유저 정보
 
-  const [users, setUsers] = useState<any[]>([]);
-  const [chat, setChat] = useState<any>('');
-  const [inputText, setInputText] = useState<any>('');
-  const [msgs, setMsgs] = useState<any[]>([]);
+  const [users, setUsers] = useState<any[]>([]); //유저 목록(로그인한 유저를 제외한)
+  const [chat, setChat] = useState<any>(''); // 유저 목록에서 선택한 유저 정보
+  const [inputText, setInputText] = useState<any>(''); // 현재 작성중인 텍스트 공간
+  const [msgs, setMsgs] = useState<any[]>([]); // 메신저
 
   const contents: RefObject<HTMLDivElement> = useRef();
 
@@ -84,10 +84,11 @@ function Lobby() {
     //상대방과 채팅하기위한 고유 id를 지정하여 방을 생성
     const id = myself > partner ? `${myself + partner}` : `${partner + myself}`;
 
+    //DB의 messages 생성 필드 id에 대한 chat을 생성
     const msgRef = collection(db, 'messages', id, 'chat');
     const dateQuery = query(msgRef, orderBy('createdAt', 'asc')); //최신 메시지 오름차순 정렬
 
-    //오름차순으로 정렬된 msgs를 DB의 messages -> chat 에 담는다
+    //오름차순으로 정렬된 msgs를 DB의 msgs상태관리에 저장
     onSnapshot(dateQuery, (querySnapshot) => {
       let msgs = [];
       querySnapshot.forEach((doc) => {
@@ -99,7 +100,7 @@ function Lobby() {
     //마지막 메시지를 보내 읽었는지 안 읽었는지 확인하여 선택했을때 읽음 으로 표시
     const docSnap = await getDoc(doc(db, 'lastMsg', id));
 
-    if (docSnap.data() === undefined) return;
+    if (docSnap.data() === undefined) return; //신규 유저일 경우 lastMsg 테이블에 값이 없기때문에 빠져나오는 곳
     if (docSnap.data().from !== myself) {
       await updateDoc(doc(db, 'lastMsg', id), { unread: false });
     }
