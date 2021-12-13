@@ -6,16 +6,16 @@ import { db } from '../utils/firebase';
 interface UserProps {
   user: UserType; // 부모컴포넌트에서 import 해온 타입을 재사용 해 줍시다.
   selectUser: (UserType) => void;
-  user1;
+  myself;
   chat;
 }
 
-const User = ({ user, selectUser, user1, chat }: UserProps) => {
-  const user2 = user?.uid;
+const User = ({ user, selectUser, myself }: UserProps) => {
+  const partner = user?.uid;
   const [data, setData] = useState<any>('');
 
   useEffect(() => {
-    const id = user1 > user2 ? `${user1 + user2}` : `${user2 + user1}`;
+    const id = myself > partner ? `${myself + partner}` : `${partner + myself}`;
     let unsub = onSnapshot(doc(db, 'lastMsg', id), (doc) => {
       setData(doc.data());
     });
@@ -31,7 +31,7 @@ const User = ({ user, selectUser, user1, chat }: UserProps) => {
       <div key={user.id} className="room-container-item">
         <div className="room-container-item__title">
           {user.name}
-          {data?.from !== user1 && data?.unread && (
+          {data?.from !== myself && data?.unread && (
             <small className="unread">New</small>
           )}
         </div>
@@ -43,12 +43,6 @@ const User = ({ user, selectUser, user1, chat }: UserProps) => {
           }
         ></div>
       </div>
-      {data.unread && (
-        <p className="truncate">
-          <strong>{data.from === user1 ? 'Me:' : null}</strong>
-          <small>{data.inputText}</small>
-        </p>
-      )}
     </div>
   );
 };

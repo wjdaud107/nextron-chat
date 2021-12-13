@@ -29,10 +29,8 @@ function Home() {
 
       if (error.message === 'Firebase: Error (auth/wrong-password).') {
         return alert('비빌번호가 틀렸습니다.');
-      } else {
-        router.push('/signup');
       }
-      console.log(error.message);
+      router.push('/signup');
     }
   };
 

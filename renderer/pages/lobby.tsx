@@ -23,6 +23,7 @@ import {
 } from 'firebase/firestore';
 import { useRouter } from 'next/router';
 import User from '../components/User';
+import Chat from '../components/Chat';
 
 function Lobby() {
   const router = useRouter();
@@ -40,7 +41,7 @@ function Lobby() {
   useEffect(() => {
     setEmail('');
     setPassword('');
-    console.log(auth.currentUser);
+
     if (!auth.currentUser) {
       router.push('/home');
     } else {
@@ -70,11 +71,10 @@ function Lobby() {
 
   const selectUser = async (user) => {
     setChat(user);
-    console.log(user);
 
-    const user1 = auth.currentUser.uid;
-    const user2 = user.uid;
-    const id = user1 > user2 ? `${user1 + user2}` : `${user2 + user1}`;
+    const myself = auth.currentUser.uid;
+    const partner = user.uid;
+    const id = myself > partner ? `${myself + partner}` : `${partner + myself}`;
 
     const msgRef = collection(db, 'messages', id, 'chat');
     const q = query(msgRef, orderBy('createdAt', 'asc'));
@@ -87,41 +87,41 @@ function Lobby() {
       setMsgs(msgs);
     });
     const docSnap = await getDoc(doc(db, 'lastMsg', id));
-    // if (docSnap.data().from !== user1) {
-    await updateDoc(doc(db, 'lastMsg', id), { unread: false });
-    // }
+
+    if (docSnap.data() === undefined) return;
+    if (docSnap.data().from !== myself) {
+      await updateDoc(doc(db, 'lastMsg', id), { unread: false });
+    }
   };
 
-  console.log(msgs);
-
   const sendChatMessage = async () => {
-    const user1 = auth.currentUser.uid;
-    const user2 = chat.uid;
-    // messages => id => chat => add doc
-    const id = user1 > user2 ? `${user1 + user2}` : `${user2 + user1}`;
-    await addDoc(collection(db, 'messages', id, 'chat'), {
-      inputText,
-      from: user1,
-      name: user.get('name'),
-      to: user2,
-      createdAt: Timestamp.fromDate(new Date()),
-    });
-
-    await setDoc(doc(db, 'lastMsg', id), {
-      inputText,
-      from: user1,
-      name: user.get('name'),
-      to: user2,
-      createdAt: Timestamp.fromDate(new Date()),
-      unread: true,
-    });
-    await setInputText('');
-
     if (!inputText.trim()) {
       alert('내용을 입력하세요');
       setInputText('');
       return;
     }
+    const myself = auth.currentUser.uid;
+    const partner = chat.uid;
+    // messages => id => chat => add doc
+    const id = myself > partner ? `${myself + partner}` : `${partner + myself}`;
+    await addDoc(collection(db, 'messages', id, 'chat'), {
+      inputText,
+      from: myself,
+      name: user.get('name'),
+      to: partner,
+      createdAt: Timestamp.fromDate(new Date()),
+    });
+
+    await setDoc(doc(db, 'lastMsg', id), {
+      inputText,
+      from: myself,
+      name: user.get('name'),
+      to: partner,
+      createdAt: Timestamp.fromDate(new Date()),
+      unread: true,
+    });
+
+    await setInputText('');
   };
 
   const handleSignout = async () => {
@@ -160,7 +160,7 @@ function Lobby() {
                   key={i}
                   user={user}
                   selectUser={selectUser}
-                  user1={auth.currentUser.uid}
+                  myself={auth.currentUser.uid}
                   chat={chat}
                 />
               ))}
@@ -168,26 +168,8 @@ function Lobby() {
 
             <div className="chat-container">
               <div ref={contents} className="chat-contents">
-                {msgs.map((x, i) => (
-                  <div
-                    key={i}
-                    className={
-                      x.from === auth.currentUser.uid
-                        ? 'chat-container-item own'
-                        : 'chat-container-item'
-                    }
-                  >
-                    <div className="chat-container-item__author">{x.name}</div>
-                    <div
-                      className={
-                        x.from === auth.currentUser.uid
-                          ? 'chat-container-item__text me'
-                          : 'chat-container-item__text friend'
-                      }
-                    >
-                      {x.inputText}
-                    </div>
-                  </div>
+                {msgs.map((user, i) => (
+                  <Chat key={i} user={user} myself={auth.currentUser.uid} />
                 ))}
               </div>
 
@@ -218,7 +200,9 @@ export type UserType = {
   id: number;
   name: string;
   isOnline: boolean;
-  user1: any;
+  myself: any;
+  from: string;
+  inputText: string;
 };
 
 export default Lobby;
