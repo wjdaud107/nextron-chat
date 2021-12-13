@@ -6,11 +6,11 @@ import { Loading } from '../components/Loading';
 export const Context = createContext<any>({});
 
 export const ContextProvider = (props) => {
-  const [name, setName] = useState<any>('');
-  const [email, setEmail] = useState<any>('');
-  const [password, setPassword] = useState<any>('');
+  const [name, setName] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
   const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState<any>(true);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {

@@ -51,7 +51,6 @@ function SignUp() {
         setLoading(false);
         alert('비밀번호가 6글자 이상이여야 합니다.');
       }
-      console.log(error.message);
     }
   };
 
