@@ -20,7 +20,7 @@
 
 .auth-container.sign {
   height: 366px;
-    top: calc(50vh - (366px / 2));
+  top: calc(50vh - (366px / 2));
 }
 
 .siginup-container {
