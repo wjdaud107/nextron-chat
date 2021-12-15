@@ -7,7 +7,6 @@ import React, {
 } from 'react';
 import { Context } from '../context';
 import { auth, db } from '../utils/firebase';
-import { signOut } from 'firebase/auth';
 import {
   updateDoc,
   collection,
@@ -47,12 +46,13 @@ function Lobby() {
     } else {
       //초기화 후 유저 유저 목록 리스트 onSnapshot을 이용하여 실시간으로 가져온다
       init();
-
+      // 나를 제외한 모든 유저 정보 가져오기
       const userRef = collection(db, 'users');
       const userInfo = query(
         userRef,
         where('uid', 'not-in', [auth.currentUser.uid])
       );
+      //onSnapshot 실시간 데이터베이스 접근
       const unsub = onSnapshot(userInfo, (querySnapshot) => {
         let users = [];
         querySnapshot.forEach((doc) => {
@@ -143,7 +143,6 @@ function Lobby() {
     await updateDoc(doc(db, 'users', auth.currentUser.uid), {
       isOnline: false,
     });
-    await signOut(auth);
     router.push('/home');
   };
 
