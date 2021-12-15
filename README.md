@@ -4,7 +4,7 @@
 
 `npm install`
 
-## Check install
+## Start
 
 `npm run dev`
 
